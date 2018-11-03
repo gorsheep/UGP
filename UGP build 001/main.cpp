@@ -1,4 +1,5 @@
 #include <iostream>
+using namespace std;
 
 // GLEW
 #define GLEW_STATIC
@@ -30,14 +31,14 @@ int main( )
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
     
     // Create a GLFWwindow object that we can use for GLFW's functions
-    GLFWwindow *window = glfwCreateWindow( WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr );
+    GLFWwindow *window = glfwCreateWindow( WIDTH, HEIGHT, "Unnamed Game Project (Pre-Alpha)", nullptr, nullptr );
     
     int screenWidth, screenHeight;
     glfwGetFramebufferSize( window, &screenWidth, &screenHeight );
     
     if ( nullptr == window )
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        cout << "Failed to create GLFW window" << endl;
         glfwTerminate( );
         
         return EXIT_FAILURE;
@@ -50,7 +51,7 @@ int main( )
     // Initialize GLEW to setup the OpenGL Function pointers
     if ( GLEW_OK != glewInit( ) )
     {
-        std::cout << "Failed to initialize GLEW" << std::endl;
+        cout << "Failed to initialize GLEW" << endl;
         return EXIT_FAILURE;
     }
     
@@ -64,15 +65,51 @@ int main( )
     // Build and compile our shader program
     Shader ourShader( "resources/shaders/core.vs", "resources/shaders/core.frag" );
     
+    int width, height;
+    float scale = 1;
     
-    // Set up vertex data (and buffer(s)) and attribute pointers
+    //Функция SOIL_load_image() заполняет переменные width и height значениями для картинки, которая передаётся в функцию первым аргументом
+    unsigned char *image = SOIL_load_image("resources/images/i.png", &width, &height, 0, SOIL_LOAD_RGBA);
+    
+    if ((width > WIDTH) || (height > HEIGHT)) {
+        if (width > height) {
+            scale = 1/(width/WIDTH);
+        }
+        if (width < height) {
+            scale = 1/(height/WIDTH);
+        }
+    }
+    
+    //Координаты нижнего левого угла в системе координат игрового окна (обычная ДСК)
+    GLfloat posX = 200;
+    GLfloat posY = 0;
+    
+    //Координаты нижнего левого угла в системе координат OpenGL
+    GLfloat ax = (posX-WIDTH/2)/(WIDTH/2);
+    GLfloat ay = (posY-HEIGHT/2)/(HEIGHT/2);
+    
+    //Координаты верхнего левого угла в системе координат OpenGL
+    GLfloat bx = ax;
+    GLfloat by = ay+height*scale/HEIGHT;
+    
+    //Координаты верхнего правого угла в системе координат OpenGL
+    GLfloat cx = ax+width*scale/WIDTH;
+    GLfloat cy = ay+height*scale/HEIGHT;
+    
+    //Координаты нижнего правого угла в системе координат OpenGL
+    GLfloat dx = ax+width*scale/WIDTH;;
+    GLfloat dy = ay;
+    
+    cout << "(" << ax << ", " << ay << "), (" << bx << ", " << by << "), (" << cx << ", " << cy << "), (" << dx << ", " << dy << ")" << endl;
+    
+    
     GLfloat vertices[] =
     {
         // Positions          // Colors           // Texture Coords
-        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // Top Right
-        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // Bottom Right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left
+        cx,  cy, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // Top Right
+        dx, dy, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // Bottom Right
+        ax, ay, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom Left
+        bx,  by, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // Top Left
     };
     
     GLuint indices[] =
@@ -109,7 +146,7 @@ int main( )
     
     GLuint texture;
     
-    int width, height;
+//    int width, height;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     
@@ -118,13 +155,15 @@ int main( )
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    unsigned char *image = SOIL_load_image("resources/images/1.png", &width, &height, 0, SOIL_LOAD_RGBA);
+    
+    //Функция SOIL_load_image() заполняет переменные width и height значениями для картинки, которая передаётся в функцию первым аргументом
+//    unsigned char *image = SOIL_load_image("resources/images/i.png", &width, &height, 0, SOIL_LOAD_RGBA);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
     glGenerateMipmap(GL_TEXTURE_2D);
     SOIL_free_image_data(image);
     glBindTexture(GL_TEXTURE_2D, 0);
     
-    
+    cout << width << ", " << height << endl;
     
     
     
